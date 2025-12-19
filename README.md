@@ -299,6 +299,7 @@ Key insights:
 # Installation Guide - Quantum Market Split Problem
 
 ### Create Virtual Environment 
+Python 3.12 must be used
 
 ```bash
 # Create a new virtual environment

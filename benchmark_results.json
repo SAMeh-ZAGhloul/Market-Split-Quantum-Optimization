@@ -1,0 +1,430 @@
+{
+  "Lattice_Based": {
+    "instances_tested": 3,
+    "successful_solutions": 3,
+    "total_solve_time": 0.006300449371337891,
+    "avg_solve_time": 0.0021001497904459634,
+    "avg_slack_total": Infinity,
+    "success_rate": 1.0,
+    "individual_results": [
+      {
+        "success": true,
+        "solve_time": 0.004301786422729492,
+        "total_time": 0.00430607795715332,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 0.0010268688201904297,
+        "total_time": 0.0010302066802978516,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 0.0009717941284179688,
+        "total_time": 0.0009739398956298828,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      }
+    ]
+  },
+  "D-Wave_SA": {
+    "instances_tested": 3,
+    "successful_solutions": 3,
+    "total_solve_time": 2.0265579223632812e-05,
+    "avg_solve_time": 6.7551930745442706e-06,
+    "avg_slack_total": Infinity,
+    "success_rate": 1.0,
+    "individual_results": [
+      {
+        "success": true,
+        "solve_time": 1.0013580322265625e-05,
+        "total_time": 1.5020370483398438e-05,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 6.198883056640625e-06,
+        "total_time": 7.152557373046875e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 4.0531158447265625e-06,
+        "total_time": 4.0531158447265625e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      }
+    ]
+  },
+  "VQE": {
+    "instances_tested": 3,
+    "successful_solutions": 3,
+    "total_solve_time": 0.0001933574676513672,
+    "avg_solve_time": 6.445248921712239e-05,
+    "avg_slack_total": Infinity,
+    "success_rate": 1.0,
+    "individual_results": [
+      {
+        "success": true,
+        "solve_time": 7.152557373046875e-06,
+        "total_time": 9.298324584960938e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 5.245208740234375e-06,
+        "total_time": 5.245208740234375e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 0.00018095970153808594,
+        "total_time": 0.00018310546875,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      }
+    ]
+  },
+  "QAOA": {
+    "instances_tested": 3,
+    "successful_solutions": 3,
+    "total_solve_time": 1.6689300537109375e-05,
+    "avg_solve_time": 5.563100179036458e-06,
+    "avg_slack_total": Infinity,
+    "success_rate": 1.0,
+    "individual_results": [
+      {
+        "success": true,
+        "solve_time": 6.9141387939453125e-06,
+        "total_time": 8.821487426757812e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 5.7220458984375e-06,
+        "total_time": 5.7220458984375e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      },
+      {
+        "success": true,
+        "solve_time": 4.0531158447265625e-06,
+        "total_time": 4.76837158203125e-06,
+        "slack_total": Infinity,
+        "error": null,
+        "solution": {
+          "x": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
+          ],
+          "slack_total": Infinity
+        }
+      }
+    ]
+  },
+  "_import_errors": {
+    "OR-Tools": "OR-Tools not available: No module named 'ortools'",
+    "Pyomo_Gurobi": "Pyomo not available: No module named 'pyomo'"
+  }
+}
