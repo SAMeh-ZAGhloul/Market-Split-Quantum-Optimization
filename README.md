@@ -4,6 +4,12 @@
 
 The Market Split Problem (MSP) is a challenging combinatorial optimization problem that originated from real-world logistics and market allocation scenarios. It serves as a benchmark for testing the limits of integer linear programming solvers, lattice-based algorithms, and quantum optimization approaches. The problem is characterized by its high symmetry and the extreme "thinness" of its feasible region, making traditional branch-and-bound methods ineffective.
 
+![Market Split Problem](Market%20Split%20Problem.png)
+
+**📄 [View Tutorial Slides](Market%20Split%20Problem.pdf)**
+
+**🎥 [Watch Video Tutorial](Market%20Split%20Problem.mp4)**
+
 ## Historical Context
 
 The problem was first formalized by H. Paul Williams in 1978 for UK oil market allocation, where a company needed to distribute retailers between two divisions to balance market share for multiple products. In 1998, Gérard Cornuéjols and Milind Dawande presented challenging instances at IPCO VI that proved unsolvable for contemporary commercial solvers, transforming it into a mathematical benchmark.
