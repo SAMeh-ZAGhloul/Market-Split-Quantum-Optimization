@@ -355,7 +355,7 @@ python3 source/example_usage.py
 | VQE | 15x3 | 120 | 80% |
 | QAOA | 15x3 | 90 | 85% |
 
-## Extensions
+## Future Work
 
 - **Market Multisplit Problem (MMP)**: Assignment to d divisions
 - **QOBLIB Benchmarks**: Quantum optimization test suite
