@@ -1,5 +1,0 @@
-- [x] Analyze the current equation format
-- [x] Format Feasibility Variant (fMSP) equations properly
-- [x] Format Optimization Variant (OPT) equations properly
-- [x] Create a comprehensive formatted document
-- [x] Verify the mathematical notation is correct
