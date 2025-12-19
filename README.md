@@ -277,35 +277,73 @@ Key insights:
 
 ## Repository Contents
 
+### Documentation and Media Files
+- [`README.md`](README.md): Main project documentation and comprehensive guide to the Market Split Problem
 - [`Market Split Problem.md`](Market Split Problem.md): Detailed implementations and benchmarking code
 - [`Market Split Problem.docx`](Market Split Problem.docx): Comprehensive analytical report on MSP history, theory, and algorithms
 - [`Market Split Problem.pdf`](Market Split Problem.pdf): PDF version of the analytical report
 - [`Market Split Problem.png`](Market Split Problem.png): Visual diagram of the problem structure
 - [`Market Split Problem.mp4`](Market Split Problem.mp4): Video explanation/tutorial
 
-## Installation and Usage
+### Source Code Directory (`source/`)
+- [`benchmark_framework.py`](source/benchmark_framework.py): Comprehensive benchmarking framework for comparing solver performance
+- [`pyomo_solver.py`](source/pyomo_solver.py): Pyomo-based solver implementation with Gurobi backend
+- [`ortools_solver.py`](source/ortools_solver.py): OR-Tools CP-SAT solver implementation for constraint programming
+- [`lattice_solver.py`](source/lattice_solver.py): Lattice-based solver using LLL/BKZ reduction algorithms
+- [`dwave_solver.py`](source/dwave_solver.py): D-Wave quantum annealing solver implementation
+- [`qiskit_solver.py`](source/qiskit_solver.py): Qiskit-based quantum optimization solver (VQE/QAOA)
+- [`example_usage.py`](source/example_usage.py): Updated examples with corrected implementations
+- [`requirements.txt`](source/requirements.txt): Python dependencies and package specifications
 
-### Prerequisites
+
+# Installation Guide - Quantum Market Split Problem
+
+### Create Virtual Environment 
+
 ```bash
-pip install numpy pyomo gurobi ortools qiskit dwave-ocean-sdk fpylll
+# Create a new virtual environment
+python3 -m venv market_split_env
+
+# Activate the virtual environment
+# On macOS/Linux:
+source market_split_env/bin/activate
+
+# On Windows:
+# market_split_env\Scripts\activate
 ```
 
-### Example Usage
-```python
-import numpy as np
-from solvers import PyomoMarketSplitSolver, ORToolsMarketSplitSolver
+### Install Dependencies
 
-# Generate test instance
-rng = np.random.default_rng(42)
-A = rng.integers(1, 10, size=(5, 30))
-true_solution = rng.integers(0, 2, size=30)
-b = A @ true_solution
-
-# Solve with Pyomo
-solver = PyomoMarketSplitSolver()
-solution, time_taken = solver.solve_market_split(A, b, time_limit=60)
-print(f"Solution found in {time_taken:.2f}s with slack {solution['slack_total']}")
+```bash
+# Install all dependencies from the requirements file
+pip install -r source/requirements.txt
 ```
+
+### Run Example
+
+Test the complete setup with a simple example:
+
+```bash
+# Run the benchmarking framework
+python3 source/benchmark_framework.py
+
+# Or run a simple example
+python3 source/example_usage.py
+```
+
+## Performance Notes
+
+- **Classical Solvers**: Work best on problems up to 50 variables
+- **Quantum Solvers**: Limited by qubit count (typically 15-20 variables for current hardware)
+- **Lattice Solvers**: Very fast for small problems (m < 10, n < 50)
+
+## Additional Resources
+
+- [Qiskit Documentation](https://qiskit.org/documentation/)
+- [D-Wave Ocean SDK](https://docs.ocean.dwavesys.com/)
+- [Pyomo Documentation](https://pyomo.readthedocs.io/)
+- [OR-Tools Documentation](https://developers.google.com/optimization)
+
 
 ## Performance Results
 
