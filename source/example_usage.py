@@ -1,15 +1,9 @@
 # Market Split Problem - Example Usage
-# Demonstrates how to use the various solvers
+# Demonstrates how to use the various solvers with graceful dependency handling
 
 import numpy as np
 import time
-
-# Import solvers
-from pyomo_solver import PyomoMarketSplitSolver
-from ortools_solver import ORToolsMarketSplitSolver
-from lattice_solver import LatticeBasedSolver
-from dwave_solver import DWaveMarketSplitSolver
-from qiskit_solver import QiskitMarketSplitSolver
+from typing import List, Dict, Any, Tuple
 
 def generate_test_instance(seed=42, m=5, n=30):
     """
@@ -64,10 +58,87 @@ def verify_solution(A, b, solution):
     
     return True, "Solution is correct"
 
+def get_available_solvers():
+    """
+    Get list of available solvers with graceful error handling
+    
+    Returns:
+        tuple: (available_solvers_list, unavailable_solvers_dict)
+    """
+    available_solvers = []
+    unavailable_solvers = {}
+    
+    # Try to import lattice solver (should always work)
+    try:
+        from lattice_solver import LatticeBasedSolver
+        available_solvers.append(("Lattice-Based", LatticeBasedSolver()))
+    except ImportError as e:
+        unavailable_solvers['Lattice-Based'] = str(e)
+    
+    # Try to import OR-Tools solver
+    try:
+        from ortools_solver import ORToolsMarketSplitSolver
+        ortools_solver = ORToolsMarketSplitSolver()
+        if ortools_solver.available:
+            available_solvers.append(("OR-Tools CP-SAT", ortools_solver))
+        else:
+            info = ortools_solver.get_availability_info()
+            unavailable_solvers['OR-Tools CP-SAT'] = info['message']
+    except ImportError as e:
+        unavailable_solvers['OR-Tools CP-SAT'] = str(e)
+    
+    # Try to import Pyomo solver
+    try:
+        from pyomo_solver import PyomoMarketSplitSolver
+        pyomo_solver = PyomoMarketSplitSolver()
+        if pyomo_solver.available:
+            available_solvers.append(("Pyomo + Gurobi", pyomo_solver))
+        else:
+            info = pyomo_solver.get_availability_info()
+            unavailable_solvers['Pyomo + Gurobi'] = info['message']
+    except ImportError as e:
+        unavailable_solvers['Pyomo + Gurobi'] = str(e)
+    
+    # Try to import D-Wave solver
+    try:
+        from dwave_solver import DWaveMarketSplitSolver
+        available_solvers.append(("D-Wave (SA)", DWaveMarketSplitSolver()))
+    except ImportError as e:
+        unavailable_solvers['D-Wave (SA)'] = str(e)
+    
+    # Try to import Qiskit solvers
+    try:
+        from qiskit_solver import QiskitMarketSplitSolver
+        available_solvers.append(("Qiskit VQE", QiskitMarketSplitSolver(method='vqe')))
+        available_solvers.append(("Qiskit QAOA", QiskitMarketSplitSolver(method='qaoa')))
+    except ImportError as e:
+        unavailable_solvers['Qiskit (VQE/QAOA)'] = str(e)
+    
+    return available_solvers, unavailable_solvers
+
 def run_example():
-    """Run example demonstrating different solvers"""
+    """Run example demonstrating different available solvers"""
     print("Market Split Problem - Example Usage")
     print("=" * 50)
+    
+    # Get available solvers
+    available_solvers, unavailable_solvers = get_available_solvers()
+    
+    # Show solver availability
+    print(f"Available solvers ({len(available_solvers)}):")
+    for name, _ in available_solvers:
+        print(f"  ✓ {name}")
+    
+    if unavailable_solvers:
+        print(f"\nUnavailable solvers ({len(unavailable_solvers)}):")
+        for name, reason in unavailable_solvers.items():
+            print(f"  ✗ {name}: {reason}")
+    
+    if not available_solvers:
+        print("Error: No solvers are available!")
+        return []
+    
+    print()
     
     # Generate test instance
     print("Generating test instance...")
@@ -76,39 +147,39 @@ def run_example():
     print(f"Target allocation: {b}")
     print()
     
-    # Test different solvers
-    solvers = [
-        ("Pyomo + Gurobi", PyomoMarketSplitSolver()),
-        ("OR-Tools CP-SAT", ORToolsMarketSplitSolver()),
-        ("Lattice-Based", LatticeBasedSolver()),
-        ("D-Wave (SA)", DWaveMarketSplitSolver()),
-        ("Qiskit VQE", QiskitMarketSplitSolver(method='vqe')),
-        ("Qiskit QAOA", QiskitMarketSplitSolver(method='qaoa'))
-    ]
-    
+    # Test available solvers
     results = []
     
-    for solver_name, solver in solvers:
+    for solver_name, solver in available_solvers:
         print(f"Testing {solver_name}...")
         try:
             start_time = time.time()
             solution, solve_time = solver.solve_market_split(A, b, time_limit=60)
             total_time = time.time() - start_time
             
-            # Verify solution
-            is_valid, message = verify_solution(A, b, solution)
+            # Check if this is a fallback solution
+            is_fallback = solution.get('fallback', False)
+            
+            # Verify solution only if not a fallback
+            if not is_fallback:
+                is_valid, message = verify_solution(A, b, solution)
+            else:
+                is_valid = False
+                message = f"Fallback solution (original error: {solution.get('error', 'Unknown')})"
             
             results.append({
                 'solver': solver_name,
-                'success': True,
+                'success': not is_fallback,
                 'solve_time': solve_time,
                 'total_time': total_time,
                 'slack_total': solution.get('slack_total', float('inf')),
                 'valid': is_valid,
-                'message': message
+                'message': message,
+                'fallback': is_fallback
             })
             
-            print(f"  ✓ Success in {solve_time:.3f}s")
+            status = "✓ Success" if not is_fallback else "⚠ Fallback"
+            print(f"  {status} in {solve_time:.3f}s")
             print(f"  Slack total: {solution.get('slack_total', 'N/A')}")
             print(f"  Valid: {is_valid} ({message})")
             
@@ -121,7 +192,8 @@ def run_example():
                 'total_time': float('inf'),
                 'slack_total': float('inf'),
                 'valid': False,
-                'message': "Solver failed"
+                'message': "Solver failed",
+                'fallback': False
             })
             
             print(f"  ✗ Failed: {e}")
@@ -130,24 +202,46 @@ def run_example():
     
     # Summary
     print("SUMMARY")
-    print("-" * 30)
-    print(f"{'Solver':<20} {'Success':<8} {'Time (s)':<10} {'Slack':<10} {'Valid':<8}")
-    print("-" * 30)
+    print("-" * 50)
+    print(f"{'Solver':<20} {'Status':<10} {'Time (s)':<10} {'Slack':<10} {'Valid':<8}")
+    print("-" * 50)
     
     for result in results:
-        success_str = "Yes" if result['success'] else "No"
+        if result['fallback']:
+            status = "Fallback"
+        elif result['success']:
+            status = "Success"
+        else:
+            status = "Failed"
+            
         time_str = f"{result['solve_time']:.3f}" if result['solve_time'] != float('inf') else "N/A"
         slack_str = f"{result['slack_total']:.3f}" if result['slack_total'] != float('inf') else "N/A"
         valid_str = "Yes" if result['valid'] else "No"
         
-        print(f"{result['solver']:<20} {success_str:<8} {time_str:<10} {slack_str:<10} {valid_str:<8}")
+        print(f"{result['solver']:<20} {status:<10} {time_str:<10} {slack_str:<10} {valid_str:<8}")
     
     return results
 
 def compare_solvers():
-    """Compare performance of different solvers on multiple instances"""
-    print("\nComparing solvers on multiple instances...")
-    print("=" * 50)
+    """Compare performance of available solvers on multiple instances"""
+    print("\nComparing available solvers on multiple instances...")
+    print("=" * 60)
+    
+    # Get available solvers
+    available_solvers, unavailable_solvers = get_available_solvers()
+    
+    # Filter to only classical solvers that should work well
+    classical_solvers = [(name, solver) for name, solver in available_solvers 
+                        if 'Lattice' in name or 'OR-Tools' in name or 'Pyomo' in name]
+    
+    if not classical_solvers:
+        print("No classical solvers available for comparison.")
+        return
+    
+    print(f"Comparing {len(classical_solvers)} classical solvers:")
+    for name, _ in classical_solvers:
+        print(f"  - {name}")
+    print()
     
     # Generate multiple test instances
     instances = []
@@ -160,13 +254,7 @@ def compare_solvers():
     
     print()
     
-    # Test a subset of solvers for comparison
-    solvers = [
-        ("OR-Tools", ORToolsMarketSplitSolver()),
-        ("Pyomo", PyomoMarketSplitSolver())
-    ]
-    
-    for solver_name, solver in solvers:
+    for solver_name, solver in classical_solvers:
         print(f"Testing {solver_name} on all instances...")
         total_time = 0
         successful = 0
@@ -177,23 +265,116 @@ def compare_solvers():
                 solution, solve_time = solver.solve_market_split(A, b, time_limit=30)
                 total_time += solve_time
                 
-                is_valid, _ = verify_solution(A, b, solution)
-                if is_valid:
-                    successful += 1
+                # Check if it's a valid solution (not fallback)
+                if not solution.get('fallback', False):
+                    is_valid, _ = verify_solution(A, b, solution)
+                    if is_valid:
+                        successful += 1
+                    status = '✓' if is_valid else '✗'
+                else:
+                    status = '⚠'
                     
-                print(f"  Instance {i+1}: {solve_time:.3f}s - {'✓' if is_valid else '✗'}")
+                print(f"  Instance {i+1}: {solve_time:.3f}s - {status}")
                 
             except Exception as e:
                 print(f"  Instance {i+1}: Failed - {e}")
         
-        print(f"  Summary: {successful}/{len(instances)} successful, avg time: {total_time/len(instances):.3f}s")
+        if successful > 0:
+            avg_time = total_time/successful
+            print(f"  Summary: {successful}/{len(instances)} successful, avg time: {avg_time:.3f}s")
+        else:
+            print(f"  Summary: 0/{len(instances)} successful")
+        print()
+
+def show_solver_info():
+    """Show detailed information about solver availability"""
+    print("\nSOLVER AVAILABILITY DETAILS")
+    print("=" * 40)
+    
+    # Lattice solver
+    try:
+        from lattice_solver import LatticeBasedSolver
+        print("✓ Lattice-Based Solver:")
+        print("  - Uses fpylll for lattice reduction")
+        print("  - Transforms MSP to Shortest Vector Problem")
+        print("  - Very fast for small problems")
+        print()
+    except ImportError as e:
+        print(f"✗ Lattice-Based Solver: {e}")
+        print()
+    
+    # OR-Tools solver
+    try:
+        from ortools_solver import ORToolsMarketSplitSolver
+        info = ORToolsMarketSplitSolver.get_availability_info()
+        if info['available']:
+            print("✓ OR-Tools CP-SAT Solver:")
+            print("  - Uses Google OR-Tools constraint programming")
+            print("  - Fast for constraint satisfaction problems")
+            print("  - Requires Python < 3.14")
+        else:
+            print("✗ OR-Tools CP-SAT Solver:")
+            print(f"  - {info['message']}")
+            print(f"  - {info.get('installation_hint', '')}")
+        print()
+    except ImportError as e:
+        print(f"✗ OR-Tools CP-SAT Solver: {e}")
+        print()
+    
+    # Pyomo solver
+    try:
+        from pyomo_solver import PyomoMarketSplitSolver
+        info = PyomoMarketSplitSolver.get_availability_info()
+        if info['available']:
+            print("✓ Pyomo + Gurobi Solver:")
+            print("  - Uses Pyomo optimization modeling")
+            print("  - Requires commercial Gurobi solver")
+            print("  - Provides optimal solutions")
+        else:
+            print("✗ Pyomo + Gurobi Solver:")
+            print(f"  - {info['message']}")
+            print(f"  - {info.get('installation_hint', '')}")
+        print()
+    except ImportError as e:
+        print(f"✗ Pyomo + Gurobi Solver: {e}")
+        print()
+    
+    # Quantum solvers
+    try:
+        from dwave_solver import DWaveMarketSplitSolver
+        print("✓ D-Wave Quantum Solver:")
+        print("  - Uses D-Wave quantum annealer")
+        print("  - Requires D-Wave API token for real hardware")
+        print("  - Falls back to simulated annealing")
+        print()
+    except ImportError as e:
+        print(f"✗ D-Wave Quantum Solver: {e}")
+        print()
+    
+    try:
+        from qiskit_solver import QiskitMarketSplitSolver
+        print("✓ Qiskit Quantum Solvers:")
+        print("  - VQE (Variational Quantum Eigensolver)")
+        print("  - QAOA (Quantum Approximate Optimization)")
+        print("  - Runs on simulators or IBM quantum hardware")
+        print()
+    except ImportError as e:
+        print(f"✗ Qiskit Quantum Solvers: {e}")
         print()
 
 if __name__ == "__main__":
+    # Show detailed solver information
+    show_solver_info()
+    
     # Run the main example
     results = run_example()
     
-    # Run comparison
-    compare_solvers()
+    # Run comparison if we have multiple working solvers
+    if len([r for r in results if r['success']]) > 1:
+        compare_solvers()
     
-    print("Example usage completed!")
+    print("\nExample usage completed!")
+    print("\nRecommendations:")
+    print("- For best results, use Python 3.11 or 3.12")
+    print("- Install missing dependencies as shown above")
+    print("- The lattice-based solver works with current Python 3.14 setup")

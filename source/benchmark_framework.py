@@ -5,12 +5,55 @@ import time
 import numpy as np
 from typing import Dict, List, Tuple, Callable
 
-# Import all solvers
-from pyomo_solver import PyomoMarketSplitSolver
-from ortools_solver import ORToolsMarketSplitSolver
-from lattice_solver import LatticeBasedSolver
-from dwave_solver import DWaveMarketSplitSolver
-from qiskit_solver import QiskitMarketSplitSolver
+# Try to import all solvers with graceful fallbacks
+def import_solvers():
+    """Import all available solvers, handling missing dependencies"""
+    solvers = {}
+    import_errors = {}
+    
+    # Import lattice solver (should always work)
+    try:
+        from lattice_solver import LatticeBasedSolver
+        solvers['Lattice_Based'] = LatticeBasedSolver()
+    except ImportError as e:
+        import_errors['Lattice_Based'] = str(e)
+    
+    # Import D-Wave solver (graceful fallback)
+    try:
+        from dwave_solver import DWaveMarketSplitSolver
+        solvers['D-Wave_SA'] = DWaveMarketSplitSolver()
+    except ImportError as e:
+        import_errors['D-Wave_SA'] = str(e)
+    
+    # Import Qiskit solver (graceful fallback)
+    try:
+        from qiskit_solver import QiskitMarketSplitSolver
+        solvers['VQE'] = QiskitMarketSplitSolver(method='vqe')
+        solvers['QAOA'] = QiskitMarketSplitSolver(method='qaoa')
+    except ImportError as e:
+        import_errors['Qiskit_Solvers'] = str(e)
+    
+    # Import OR-Tools solver (graceful fallback)
+    try:
+        from ortools_solver import ORToolsMarketSplitSolver
+        if ORToolsMarketSplitSolver.get_availability_info()['available']:
+            solvers['OR-Tools'] = ORToolsMarketSplitSolver()
+        else:
+            import_errors['OR-Tools'] = ORToolsMarketSplitSolver.get_availability_info()['message']
+    except ImportError as e:
+        import_errors['OR-Tools'] = str(e)
+    
+    # Import Pyomo solver (graceful fallback)
+    try:
+        from pyomo_solver import PyomoMarketSplitSolver
+        if PyomoMarketSplitSolver.get_availability_info()['available']:
+            solvers['Pyomo_Gurobi'] = PyomoMarketSplitSolver()
+        else:
+            import_errors['Pyomo_Gurobi'] = PyomoMarketSplitSolver.get_availability_info()['message']
+    except ImportError as e:
+        import_errors['Pyomo_Gurobi'] = str(e)
+    
+    return solvers, import_errors
 
 class MarketSplitBenchmark:
     """
@@ -20,18 +63,19 @@ class MarketSplitBenchmark:
     - Classical Optimization (Pyomo/Gurobi, OR-Tools CP-SAT)
     - Lattice-Based Methods (solvediophant with LLL/BKZ)
     - Quantum Optimization (D-Wave, Qiskit VQE/QAOA)
+    
+    Gracefully handles missing dependencies
     """
     
     def __init__(self):
         self.results = {}
-        self.solvers = {
-            'Pyomo_Gurobi': PyomoMarketSplitSolver(),
-            'OR-Tools': ORToolsMarketSplitSolver(),
-            'Lattice_Based': LatticeBasedSolver(),
-            'D-Wave_SA': DWaveMarketSplitSolver(),
-            'VQE': QiskitMarketSplitSolver(method='vqe'),
-            'QAOA': QiskitMarketSplitSolver(method='qaoa')
-        }
+        self.solvers, self.import_errors = import_solvers()
+        
+        if self.import_errors:
+            print("Warning: Some solvers are not available:")
+            for solver_name, error in self.import_errors.items():
+                print(f"  - {solver_name}: {error}")
+            print()
     
     def run_solver(self, solver_name: str, solver: Callable, A: np.ndarray, b: np.ndarray, 
                    time_limit: float = 60.0) -> Dict:
@@ -61,13 +105,20 @@ class MarketSplitBenchmark:
             
             total_time = time.time() - start_time
             
+            # Extract slack_total, handling different result formats
+            slack_total = result.get('slack_total', float('inf'))
+            if 'fallback' in result and result['fallback']:
+                success = False
+            else:
+                success = True
+            
             return {
-                'success': True,
+                'success': success,
                 'solution': result,
                 'solve_time': solve_time,
                 'total_time': total_time,
-                'slack_total': result.get('slack_total', float('inf')),
-                'error': None
+                'slack_total': slack_total,
+                'error': result.get('error', None)
             }
             
         except Exception as e:
@@ -93,11 +144,18 @@ class MarketSplitBenchmark:
         Returns:
             Dictionary containing benchmark results
         """
+        if not self.solvers:
+            print("Error: No solvers are available for benchmarking!")
+            return {}
+        
         benchmark_results = {}
         
         if verbose:
             print(f"Starting benchmark with {len(instances)} instances and {len(self.solvers)} solvers")
+            print(f"Available solvers: {list(self.solvers.keys())}")
             print(f"Time limit per solver: {time_limit}s")
+            if self.import_errors:
+                print(f"Unavailable solvers: {list(self.import_errors.keys())}")
             print("-" * 60)
         
         for solver_name, solver in self.solvers.items():
@@ -130,7 +188,8 @@ class MarketSplitBenchmark:
                 if verbose:
                     status = "✓" if result['success'] else "✗"
                     slack = result['slack_total'] if result['slack_total'] != float('inf') else 'inf'
-                    print(f"- Time: {result['solve_time']:.3f}s, Slack: {slack} {status}")
+                    error_note = f" ({result['error']})" if result['error'] else ""
+                    print(f"- Time: {result['solve_time']:.3f}s, Slack: {slack} {status}{error_note}")
             
             # Calculate aggregate statistics
             if solver_results['successful_solutions'] > 0:
@@ -189,6 +248,14 @@ class MarketSplitBenchmark:
             report.append(f"{solver_name:<15} {success_rate:<12} {avg_time:<12} {avg_slack:<12}")
         
         report.append("")
+        
+        # List unavailable solvers
+        if self.import_errors:
+            report.append("UNAVAILABLE SOLVERS")
+            report.append("-" * 40)
+            for solver_name, error in self.import_errors.items():
+                report.append(f"• {solver_name}: {error}")
+            report.append("")
         
         # Detailed analysis
         report.append("DETAILED ANALYSIS")
@@ -265,6 +332,9 @@ class MarketSplitBenchmark:
                     serializable_result['solution'] = None
                 
                 serializable_results[solver_name]['individual_results'].append(serializable_result)
+        
+        # Add import errors to results
+        serializable_results['_import_errors'] = self.import_errors
         
         with open(filename, 'w') as f:
             json.dump(serializable_results, f, indent=2)

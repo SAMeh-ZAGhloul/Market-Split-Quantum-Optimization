@@ -1,4 +1,4 @@
-# Core dependencies
+# Core dependencies (Python 3.14 compatible)
 numpy>=1.20.0
 
 # Type hints (for Python < 3.9)
@@ -6,25 +6,33 @@ typing-extensions>=4.0.0
 
 # Classical Optimization Solvers
 # Pyomo - Python-based optimization modeling language
-pyomo>=6.0.0
+# ⚠️  COMPATIBILITY WARNING: Pyomo requires Python < 3.14
+#    Use Python 3.11 or 3.12 for full Pyomo support
+# pyomo>=6.0.0
 
-# OR-Tools - Google's optimization tools
-ortools>=9.0.0
+# OR-Tools - Google's optimization tools  
+# ⚠️  COMPATIBILITY WARNING: OR-Tools requires Python < 3.14
+#    Use Python 3.11 or 3.12 for full OR-Tools support
+# ortools>=9.0.0
 
 # Gurobi (requires license - commercial solver)
+# ⚠️  COMPATIBILITY WARNING: Gurobi may have Python 3.14 issues
 # gurobi>=10.0.0
 
 # Quantum Computing Libraries
 # Qiskit - IBM's quantum computing framework
+# ✅ Python 3.14 compatible (tested)
 qiskit>=0.40.0
 qiskit-optimization>=0.5.0
 
 # D-Wave Ocean SDK - D-Wave quantum annealers
+# ✅ Python 3.14 compatible (tested)
 dwave-ocean-sdk>=6.0.0
 dimod>=0.12.0
 
 # Lattice-based methods
 # fpylll - Python wrapper for fplll lattice reduction library
+# ✅ Python 3.14 compatible (tested)
 fpylll>=0.5.0
 
 # Optional: Additional quantum simulators
@@ -33,3 +41,11 @@ fpylll>=0.5.0
 # Optional: Additional optimization solvers
 # scipy>=1.7.0       # For scipy.optimize if needed
 # cvxpy>=1.2.0       # Convex optimization modeling
+
+# RECOMMENDATIONS FOR PYTHON 3.14 USERS:
+# ======================================
+# ✅ Currently working: numpy, qiskit, qiskit-optimization, dwave-ocean-sdk, dimod, fpylll
+# ❌ Not working: pyomo, ortools (require Python < 3.14)
+# 📝 Workarounds: The solvers gracefully fall back when dependencies are missing
+#
+# For full classical optimization support, use Python 3.11 or 3.12 instead of 3.14
