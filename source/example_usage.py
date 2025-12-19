@@ -106,6 +106,18 @@ def get_available_solvers():
     except ImportError as e:
         unavailable_solvers['D-Wave (SA)'] = str(e)
     
+    # Try to import PuLP solver
+    try:
+        from pulp_solver import PuLPMarketSplitSolver
+        pulp_solver = PuLPMarketSplitSolver()
+        if pulp_solver.available:
+            available_solvers.append(("PuLP + CBC", pulp_solver))
+        else:
+            info = pulp_solver.get_availability_info()
+            unavailable_solvers['PuLP + CBC'] = info['message']
+    except ImportError as e:
+        unavailable_solvers['PuLP + CBC'] = str(e)
+    
     # Try to import Qiskit solvers
     try:
         from qiskit_solver import QiskitMarketSplitSolver
@@ -337,6 +349,24 @@ def show_solver_info():
         print()
     except ImportError as e:
         print(f"✗ Pyomo + Gurobi Solver: {e}")
+        print()
+    
+    # PuLP solver
+    try:
+        from pulp_solver import PuLPMarketSplitSolver
+        info = PuLPMarketSplitSolver.get_availability_info()
+        if info['available']:
+            print("✓ PuLP + CBC Solver:")
+            print("  - Uses PuLP linear programming modeling")
+            print("  - Includes CBC solver (open source)")
+            print("  - Python 3.14 compatible")
+        else:
+            print("✗ PuLP + CBC Solver:")
+            print(f"  - {info['message']}")
+            print(f"  - {info.get('installation_hint', '')}")
+        print()
+    except ImportError as e:
+        print(f"✗ PuLP + CBC Solver: {e}")
         print()
     
     # Quantum solvers

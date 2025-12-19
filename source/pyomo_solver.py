@@ -66,10 +66,10 @@ class PyomoMarketSplitSolver:
             model.x = pyo.Var(model.J, domain=pyo.Binary)
             model.slack_plus = pyo.Var(model.I, domain=pyo.NonNegativeReals)
             model.slack_minus = pyo.Var(model.I, domain=pyo.NonNegativeReals)
-            model.objective = pyo.Objective(rule=lambda model: sum(model.slack_plus[i] + model.slack_minus[i] for i in model.I), sense=pyo.Minimize)
+            model.objective = pyo.Objective(rule=lambda model: sum(model.slack_plus[i] + model.slack_minus[i] for i in model.I), sense=pyo.minimize)
             model.balance_constraint = pyo.Constraint(model.I, rule=lambda model, i: sum(model.A[i,j] * model.x[j] for j in model.J) + model.slack_minus[i] - model.slack_plus[i] == model.b[i])
 
-            solver = SolverFactory('gurobi')
+            solver = SolverFactory('cbc')
             if time_limit:
                 solver.options['TimeLimit'] = time_limit
             results = solver.solve(model, tee=False)

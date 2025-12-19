@@ -5,12 +5,16 @@ numpy>=1.20.0
 typing-extensions>=4.0.0
 
 # Classical Optimization Solvers
+# PuLP - Python linear programming modeling language
+# ✅ Python 3.14 compatible (tested)
+pulp>=2.7.0
+
 # Pyomo - Python-based optimization modeling language
 # ⚠️  COMPATIBILITY WARNING: Pyomo requires Python < 3.14
 #    Use Python 3.11 or 3.12 for full Pyomo support
 # pyomo>=6.0.0
 
-# OR-Tools - Google's optimization tools  
+# OR-Tools - Google's optimization tools
 # ⚠️  COMPATIBILITY WARNING: OR-Tools requires Python < 3.14
 #    Use Python 3.11 or 3.12 for full OR-Tools support
 # ortools>=9.0.0
@@ -44,7 +48,7 @@ fpylll>=0.5.0
 
 # RECOMMENDATIONS FOR PYTHON 3.14 USERS:
 # ======================================
-# ✅ Currently working: numpy, qiskit, qiskit-optimization, dwave-ocean-sdk, dimod, fpylll
+# ✅ Currently working: numpy, pulp, qiskit, qiskit-optimization, dwave-ocean-sdk, dimod, fpylll
 # ❌ Not working: pyomo, ortools (require Python < 3.14)
 # 📝 Workarounds: The solvers gracefully fall back when dependencies are missing
 #

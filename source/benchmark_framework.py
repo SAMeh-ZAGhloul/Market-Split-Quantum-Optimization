@@ -53,6 +53,16 @@ def import_solvers():
     except ImportError as e:
         import_errors['Pyomo_Gurobi'] = str(e)
     
+    # Import PuLP solver (graceful fallback)
+    try:
+        from pulp_solver import PuLPMarketSplitSolver
+        if PuLPMarketSplitSolver.get_availability_info()['available']:
+            solvers['PuLP_CBC'] = PuLPMarketSplitSolver()
+        else:
+            import_errors['PuLP_CBC'] = PuLPMarketSplitSolver.get_availability_info()['message']
+    except ImportError as e:
+        import_errors['PuLP_CBC'] = str(e)
+    
     return solvers, import_errors
 
 class MarketSplitBenchmark:
