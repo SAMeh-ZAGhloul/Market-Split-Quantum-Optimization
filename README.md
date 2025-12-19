@@ -17,24 +17,38 @@ The evolution of MSP benchmarking:
 ## Problem Formulation
 
 ### Feasibility Variant (fMSP)
-Find a binary vector \(x \in \{0, 1\}^n\) satisfying:
-\[
-\sum_{j=1}^n a_{ij}x_j = d_i, \quad \text{for } i = 1, \dots, m
-\]
-where \(a_{ij}\) is the demand of retailer \(j\) for product \(i\), and \(d_i\) is the target allocation.
+
+**Problem Statement:**
+Find a binary vector $x \in \{0, 1\}^n$ satisfying:
+
+$$\sum_{j=1}^n a_{ij}x_j = d_i, \quad \text{for } i = 1, \dots, m$$
+
+**Parameters:**
+- $a_{ij}$: demand of retailer $j$ for product $i$
+- $d_i$: target allocation for product $i$
+- $x_j \in \{0, 1\}$: binary decision variable indicating whether retailer $j$ is selected
 
 ### Optimization Variant (OPT)
+
+**Problem Statement:**
 Minimize total slack when perfect split is impossible:
-\[
-\min \sum_{i=1}^m |s_i|
-\]
-subject to:
-\[
-\sum_{j=1}^n a_{ij}x_j + s_i = d_i, \quad i = 1, \dots, m
-\]
-\[
-x_j \in \{0, 1\}, \quad s_i \in \mathbb{Z}
-\]
+
+$$\min \sum_{i=1}^m |s_i|$$
+
+**Subject to:**
+
+$$\sum_{j=1}^n a_{ij}x_j + s_i = d_i, \quad i = 1, \dots, m$$
+
+$$x_j \in \{0, 1\}, \quad s_i \in \mathbb{Z}$$
+
+**Parameters:**
+- $x_j \in \{0, 1\}$: binary decision variable indicating whether retailer $j$ is selected
+- $s_i \in \mathbb{Z}$: slack variable for product $i$ (integer-valued)
+- $|s_i|$: absolute value representing the deviation from target allocation
+
+### Summary
+
+The **fMSP** variant seeks a perfect allocation where each product's demand is exactly met by the selected retailers. The **OPT** variant allows for imperfect allocations by introducing slack variables, minimizing the total deviation from the target allocations.
 
 ## Solution Approaches
 
@@ -195,11 +209,11 @@ Key insights:
 
 ## Repository Contents
 
-- `Market Split Problem.md`: Detailed implementations and benchmarking code
-- `Market Split Problem.docx`: Comprehensive analytical report on MSP history, theory, and algorithms
-- `Market Split Problem.pdf`: PDF version of the analytical report
-- `Market Split Problem.png`: Visual diagram of the problem structure
-- `Market Split Problem.mp4`: Video explanation/tutorial
+- [`Market Split Problem.md`](Market Split Problem.md): Detailed implementations and benchmarking code
+- [`Market Split Problem.docx`](Market Split Problem.docx): Comprehensive analytical report on MSP history, theory, and algorithms
+- [`Market Split Problem.pdf`](Market Split Problem.pdf): PDF version of the analytical report
+- [`Market Split Problem.png`](Market Split Problem.png): Visual diagram of the problem structure
+- [`Market Split Problem.mp4`](Market Split Problem.mp4): Video explanation/tutorial
 
 ## Installation and Usage
 
@@ -240,6 +254,37 @@ print(f"Solution found in {time_taken:.2f}s with slack {solution['slack_total']}
 - **Market Multisplit Problem (MMP)**: Assignment to d divisions
 - **QOBLIB Benchmarks**: Quantum optimization test suite
 - **GPU Acceleration**: Schroeppel-Shamir algorithm for large instances
+
+## File Previews
+
+### Market Split Problem.png
+![Market Split Problem](Market Split Problem.png)
+
+### Market Split Problem.md (Detailed Implementations)
+> The user wants to compare classical optimization approaches (Pyomo/OR-Tools) with quantum optimization for the market split problem. I should provide:
+> 1. Classical implementations using both Pyomo and OR-Tools
+> 2. Quantum optimization implementations using Qiskit
+> 3. A comparison framework to evaluate both approaches
+> 4. Performance analysis and benchmarking
+
+```python
+import numpy as np
+import pyomo.environ as pyo
+from pyomo.opt import SolverFactory
+import time
+from typing import Tuple, Dict
+import matplotlib.pyplot as plt
+
+class PyomoMarketSplitSolver:
+    def __init__(self):
+        self.model = None
+        self.results = {}
+```
+
+### Market Split Problem.docx (Analytical Report)
+> Advancements in Computational Complexity and Algorithmic Strategies for the Market Split Problem: A Comprehensive Analytical Report
+>
+> The market split problem represents a foundational challenge within the field of mathematical programming, serving as a quintessential example of a problem that is deceptively simple to state yet profoundly difficult to solve. Originally derived from real-world logistics and market allocation scenarios, it has evolved over several decades into a rigorous benchmark for testing the limits of integer linear programming (ILP) solvers, lattice-based algorithms, and recently, quantum optimization architectures.1 The problem is characterized by its high degree of symmetry and the extreme "thinness" of its feasible region, which renders traditional linear programming-based branch-and-bound techniques largely ineffective.
 
 ## References
 
