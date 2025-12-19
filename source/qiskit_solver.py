@@ -13,6 +13,62 @@ try:
 except ImportError:
     QISKIT_AVAILABLE = False
 
+def extract_solution_from_result(result, num_binary_vars):
+    """
+    Extract binary solution from VQE/QAOA result
+    
+    Args:
+        result: VQE or QAOA result object
+        num_binary_vars: Number of binary variables in the problem
+        
+    Returns:
+        List of binary values
+    """
+    if hasattr(result, 'eigenstate') and result.eigenstate is not None:
+        # Get the most probable bitstring
+        if hasattr(result.eigenstate, 'bitstrings'):
+            # Sample from the quantum state
+            bitstrings = result.eigenstate.bitstrings()
+            if bitstrings:
+                # Get the most frequent bitstring
+                from collections import Counter
+                bitstring_counts = Counter(bitstrings)
+                most_frequent_bitstring = bitstring_counts.most_common(1)[0][0]
+                # Convert to binary list (take only first num_binary_vars)
+                return [int(bit) for bit in most_frequent_bitstring[:num_binary_vars]]
+        elif hasattr(result.eigenstate, 'to_dict'):
+            # Get the state vector and find the most probable state
+            state_dict = result.eigenstate.to_dict()
+            if state_dict:
+                # Find the state with highest probability
+                max_prob = 0
+                best_state = None
+                for state_str, prob in state_dict.items():
+                    if prob > max_prob:
+                        max_prob = prob
+                        best_state = state_str
+                
+                if best_state:
+                    # Extract binary values (reverse order for Qiskit convention)
+                    return [int(bit) for bit in reversed(best_state[-num_binary_vars:])]
+    
+    # Fallback: use the optimal parameters if available
+    if hasattr(result, 'optimal_parameters') and result.optimal_parameters:
+        # Convert parameters to binary values
+        x_solution = []
+        for i in range(num_binary_vars):
+            param_key = f'x_{i}'
+            if param_key in result.optimal_parameters:
+                # Convert parameter value to binary (0 or 1)
+                val = float(result.optimal_parameters[param_key])
+                x_solution.append(1 if val > 0.5 else 0)
+            else:
+                x_solution.append(0)
+        return x_solution
+    
+    # Last resort: return all zeros
+    return [0] * num_binary_vars
+
 def solve_vqe(A, b, max_iterations=1000):
     """
     Solve Market Split Problem using VQE (Variational Quantum Eigensolver)
@@ -70,8 +126,8 @@ def solve_vqe(A, b, max_iterations=1000):
     vqe = VQE(ansatz=ansatz, optimizer=optimizer)
     result = vqe.compute_minimum_eigenvalue(ising_operator)
     
-    # Extract solution (simplified - full implementation would decode the result)
-    x_solution = [0] * n  # Placeholder - implement proper result decoding
+    # Extract solution properly
+    x_solution = extract_solution_from_result(result, n)
     
     # Calculate slack
     slack_total = 0
@@ -136,8 +192,8 @@ def solve_qaoa(A, b, p=1, max_iterations=1000):
     
     result = qaoa.compute_minimum_eigenvalue(qp.to_ising()[0])
     
-    # Extract solution (simplified)
-    x_solution = [0] * n  # Placeholder - implement proper result decoding
+    # Extract solution properly
+    x_solution = extract_solution_from_result(result, n)
     
     # Calculate slack
     slack_total = 0
@@ -173,3 +229,32 @@ class QiskitMarketSplitSolver:
         except Exception as e:
             print(f"Qiskit solver error: {e}")
             return {'x': [0] * A.shape[1], 'slack_total': float('inf')}, time.time() - start_time
+
+# Test function
+def test_qiskit_solver():
+    """Test the Qiskit solver with a simple known instance"""
+    # Create a simple test problem where we know the solution
+    A = np.array([[1, 2, 3], [2, 1, 1]])
+    # Solution should be x = [1, 1, 0] giving b = [3, 3]
+    true_x = [1, 1, 0]
+    b = A.dot(true_x)
+    
+    solver = QiskitMarketSplitSolver(method='vqe', max_iterations=100)
+    solution, solve_time = solver.solve_market_split(A, b)
+    
+    print(f"Test problem: A = \n{A}")
+    print(f"Target b = {b}")
+    print(f"Expected solution: {true_x}")
+    print(f"Found solution: {solution['x']}")
+    print(f"Solve time: {solve_time:.3f}s")
+    print(f"Slack: {solution['slack_total']}")
+    
+    # Verify the solution
+    if solution['x'] == true_x:
+        print("✓ Correct solution found!")
+    else:
+        residual = A.dot(solution['x']) - b
+        print(f"✗ Solution found. Residual: {residual}")
+
+if __name__ == "__main__":
+    test_qiskit_solver()

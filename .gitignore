@@ -22,3 +22,15 @@ Desktop.ini
 *.dylib
 build/
 dist/
+
+# Python virtual environments (large dependencies)
+market_split_env/
+market_split_new_env/
+
+# Python cache and compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
